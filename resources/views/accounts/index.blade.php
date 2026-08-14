@@ -65,13 +65,41 @@
                     <div class="mt-4">
 
                         @if ($account->is_active)
-                            <span class="text-sm text-green-600">
-                                Active
-                            </span>
+                            <div class="flex items-center justify-between">
+
+                                <span class="text-sm text-green-600">
+                                    Active
+                                </span>
+
+                                <form action="{{ route('accounts.toggle-status', $account->id) }}" method="POST">
+                                    @csrf
+                                    @method('PATCH')
+
+                                    <button type="submit" class="text-sm text-red-600 underline">
+                                        Deactivate
+                                    </button>
+
+                                </form>
+
+                            </div>
                         @else
-                            <span class="text-sm text-gray-400">
-                                Inactive
-                            </span>
+                            <div class="flex items-center justify-between">
+
+                                <span class="text-sm text-gray-400">
+                                    Inactive
+                                </span>
+
+                                <form action="{{ route('accounts.toggle-status', $account->id) }}" method="POST">
+                                    @csrf
+                                    @method('PATCH')
+
+                                    <button type="submit" class="text-sm text-green-600 underline">
+                                        Activate
+                                    </button>
+
+                                </form>
+
+                            </div>
                         @endif
 
                         <div class="mt-4">

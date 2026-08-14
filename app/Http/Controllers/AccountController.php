@@ -73,4 +73,24 @@ class AccountController extends Controller
             ->route('accounts.index')
             ->with('success', 'Account berhasil diperbarui.');
     }
+
+    public function toggleStatus(int $account)
+    {
+        $user = User::where('email', 'yoga@example.com')->firstOrFail();
+
+        $account = $user->accounts()->findOrFail($account);
+
+        $account->update([
+            'is_active' => ! $account->is_active,
+        ]);
+
+        return redirect()
+            ->route('accounts.index')
+            ->with(
+                'success',
+                $account->is_active
+                    ? 'Account berhasil diaktifkan.'
+                    : 'Account berhasil dinonaktifkan.'
+            );
+    }
 }

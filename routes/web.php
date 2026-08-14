@@ -19,3 +19,8 @@ Route::resource('accounts', AccountController::class)
         'edit',
         'update',
     ]);
+
+Route::patch(
+    '/accounts/{account}/toggle-status',
+    [AccountController::class, 'toggleStatus']
+)->name('accounts.toggle-status');
