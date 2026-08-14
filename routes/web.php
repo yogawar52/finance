@@ -12,4 +12,10 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->name('dashboard');
 
 Route::resource('accounts', AccountController::class)
-    ->only(['index', 'create', 'store']);
+    ->only([
+        'index',
+        'create',
+        'store',
+        'edit',
+        'update',
+    ]);

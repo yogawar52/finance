@@ -45,4 +45,32 @@ class AccountController extends Controller
             ->route('accounts.index')
             ->with('success', 'Account berhasil dibuat.');
     }
+
+    public function edit(int $account)
+    {
+        $user = User::where('email', 'yoga@example.com')->firstOrFail();
+
+        $account = $user->accounts()->findOrFail($account);
+
+        return view('accounts.edit', compact('account'));
+    }
+
+    public function update(Request $request, int $account)
+    {
+        $user = User::where('email', 'yoga@example.com')->firstOrFail();
+
+        $account = $user->accounts()->findOrFail($account);
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:100'],
+            'type' => ['required', 'string', 'max:50'],
+            'initial_balance' => ['required', 'numeric', 'min:0'],
+        ]);
+
+        $account->update($validated);
+
+        return redirect()
+            ->route('accounts.index')
+            ->with('success', 'Account berhasil diperbarui.');
+    }
 }
