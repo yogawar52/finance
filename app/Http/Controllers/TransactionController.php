@@ -8,26 +8,107 @@ use Illuminate\Http\Request;
 
 class TransactionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = User::where(
             'email',
             'yoga@example.com'
         )->firstOrFail();
 
-        $transactions = $user->transactions()
+        $accounts = $user->accounts()
+            ->orderBy('name')
+            ->get();
+
+        $categories = $user->categories()
+            ->with('parent')
+            ->orderBy('type')
+            ->orderBy('name')
+            ->get();
+
+        $query = $user->transactions()
             ->with([
                 'account',
                 'destinationAccount',
                 'category',
-            ])
+            ]);
+
+        // Search description
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+
+            $query->where(
+                'description',
+                'like',
+                '%' . $search . '%'
+            );
+        }
+
+        // Filter type
+        if ($request->filled('type')) {
+            $query->where(
+                'type',
+                $request->input('type')
+            );
+        }
+
+        // Filter account
+        if ($request->filled('account_id')) {
+
+            $accountId = $request->input('account_id');
+
+            $query->where(function ($q) use ($accountId) {
+
+                $q->where(
+                    'account_id',
+                    $accountId
+                )->orWhere(
+                    'destination_account_id',
+                    $accountId
+                );
+            });
+        }
+
+        // Filter category
+        if ($request->filled('category_id')) {
+
+            $query->where(
+                'category_id',
+                $request->input('category_id')
+            );
+        }
+
+        // Filter start date
+        if ($request->filled('date_from')) {
+
+            $query->whereDate(
+                'transaction_date',
+                '>=',
+                $request->input('date_from')
+            );
+        }
+
+        // Filter end date
+        if ($request->filled('date_to')) {
+
+            $query->whereDate(
+                'transaction_date',
+                '<=',
+                $request->input('date_to')
+            );
+        }
+
+        $transactions = $query
             ->orderByDesc('transaction_date')
             ->orderByDesc('id')
             ->get();
 
         return view(
             'transactions.index',
-            compact('transactions')
+            compact(
+                'transactions',
+                'accounts',
+                'categories'
+            )
         );
     }
 

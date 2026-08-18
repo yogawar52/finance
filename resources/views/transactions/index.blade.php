@@ -28,6 +28,155 @@
 
             </div>
 
+            <form method="GET" action="{{ route('transactions.index') }}" class="bg-white rounded-xl shadow p-5 mb-6">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+                    {{-- Search --}}
+
+                    <div>
+
+                        <label class="block text-sm font-medium mb-1">
+                            Search
+                        </label>
+
+                        <input type="text" name="search" value="{{ request('search') }}"
+                            placeholder="Search description..." class="w-full border rounded-lg px-3 py-2">
+
+                    </div>
+
+
+                    {{-- Type --}}
+
+                    <div>
+
+                        <label class="block text-sm font-medium mb-1">
+                            Type
+                        </label>
+
+                        <select name="type" class="w-full border rounded-lg px-3 py-2">
+
+                            <option value="">
+                                All Types
+                            </option>
+
+                            <option value="income" @selected(request('type') === 'income')>
+                                Income
+                            </option>
+
+                            <option value="expense" @selected(request('type') === 'expense')>
+                                Expense
+                            </option>
+
+                            <option value="transfer" @selected(request('type') === 'transfer')>
+                                Transfer
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    {{-- Account --}}
+
+                    <div>
+
+                        <label class="block text-sm font-medium mb-1">
+                            Account
+                        </label>
+
+                        <select name="account_id" class="w-full border rounded-lg px-3 py-2">
+
+                            <option value="">
+                                All Accounts
+                            </option>
+
+                            @foreach ($accounts as $account)
+                                <option value="{{ $account->id }}" @selected(request('account_id') == $account->id)>
+                                    {{ $account->name }}
+                                </option>
+                            @endforeach
+
+                        </select>
+
+                    </div>
+
+
+                    {{-- Category --}}
+
+                    <div>
+
+                        <label class="block text-sm font-medium mb-1">
+                            Category
+                        </label>
+
+                        <select name="category_id" class="w-full border rounded-lg px-3 py-2">
+
+                            <option value="">
+                                All Categories
+                            </option>
+
+                            @foreach ($categories as $category)
+                                <option value="{{ $category->id }}" @selected(request('category_id') == $category->id)>
+
+                                    @if ($category->parent)
+                                        {{ $category->parent->name }}
+                                        →
+                                    @endif
+
+                                    {{ $category->name }}
+
+                                </option>
+                            @endforeach
+
+                        </select>
+
+                    </div>
+
+
+                    {{-- Date From --}}
+
+                    <div>
+
+                        <label class="block text-sm font-medium mb-1">
+                            Date From
+                        </label>
+
+                        <input type="date" name="date_from" value="{{ request('date_from') }}"
+                            class="w-full border rounded-lg px-3 py-2">
+
+                    </div>
+
+
+                    {{-- Date To --}}
+
+                    <div>
+
+                        <label class="block text-sm font-medium mb-1">
+                            Date To
+                        </label>
+
+                        <input type="date" name="date_to" value="{{ request('date_to') }}"
+                            class="w-full border rounded-lg px-3 py-2">
+
+                    </div>
+
+                </div>
+
+
+                <div class="flex gap-3 mt-5">
+
+                    <button type="submit" class="bg-black text-white px-4 py-2 rounded-lg">
+                        Filter
+                    </button>
+
+                    <a href="{{ route('transactions.index') }}" class="border px-4 py-2 rounded-lg">
+                        Reset
+                    </a>
+
+                </div>
+
+            </form>
 
             @if (session('success'))
                 <div class="mb-6 bg-green-100 text-green-800 px-4 py-3 rounded-lg">
