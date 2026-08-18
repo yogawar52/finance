@@ -6,47 +6,29 @@ use App\Models\Account;
 use App\Models\Category;
 use App\Models\Transaction;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
 
 class TransactionService
 {
-    public function createExpense(
-        User $user,
-        Account $account,
-        Category $category,
-        float $amount,
-        string $description,
-        string $transactionDate,
-        ?array $metadata = null,
-    ): Transaction {
-        $this->validateAccount($user, $account);
-        $this->validateCategory($user, $category, 'expense');
-        $this->validateAmount($amount);
-
-        return $user->transactions()->create([
-            'type' => 'expense',
-            'account_id' => $account->id,
-            'destination_account_id' => null,
-            'category_id' => $category->id,
-            'amount' => $amount,
-            'description' => $description,
-            'transaction_date' => $transactionDate,
-            'metadata' => $metadata,
-        ]);
-    }
-
     public function createIncome(
         User $user,
         Account $account,
         Category $category,
         float $amount,
-        string $description,
-        string $transactionDate,
+        ?string $description = null,
+        $date = null,
         ?array $metadata = null,
     ): Transaction {
-        $this->validateAccount($user, $account);
-        $this->validateCategory($user, $category, 'income');
         $this->validateAmount($amount);
+
+        $this->validateAccount($user, $account);
+
+        $this->validateCategory(
+            $user,
+            $category,
+            'income'
+        );
 
         return $user->transactions()->create([
             'type' => 'income',
@@ -55,7 +37,38 @@ class TransactionService
             'category_id' => $category->id,
             'amount' => $amount,
             'description' => $description,
-            'transaction_date' => $transactionDate,
+            'transaction_date' => $this->parseDate($date),
+            'metadata' => $metadata,
+        ]);
+    }
+
+    public function createExpense(
+        User $user,
+        Account $account,
+        Category $category,
+        float $amount,
+        ?string $description = null,
+        $date = null,
+        ?array $metadata = null,
+    ): Transaction {
+        $this->validateAmount($amount);
+
+        $this->validateAccount($user, $account);
+
+        $this->validateCategory(
+            $user,
+            $category,
+            'expense'
+        );
+
+        return $user->transactions()->create([
+            'type' => 'expense',
+            'account_id' => $account->id,
+            'destination_account_id' => null,
+            'category_id' => $category->id,
+            'amount' => $amount,
+            'description' => $description,
+            'transaction_date' => $this->parseDate($date),
             'metadata' => $metadata,
         ]);
     }
@@ -65,17 +78,26 @@ class TransactionService
         Account $sourceAccount,
         Account $destinationAccount,
         float $amount,
-        string $description,
-        string $transactionDate,
+        ?string $description = null,
+        $date = null,
         ?array $metadata = null,
     ): Transaction {
-        $this->validateAccount($user, $sourceAccount);
-        $this->validateAccount($user, $destinationAccount);
         $this->validateAmount($amount);
+
+        $this->validateAccount(
+            $user,
+            $sourceAccount
+        );
+
+        $this->validateAccount(
+            $user,
+            $destinationAccount
+        );
 
         if ($sourceAccount->id === $destinationAccount->id) {
             throw ValidationException::withMessages([
-                'destination_account' => 'Source dan destination account tidak boleh sama.',
+                'destination_account_id' =>
+                    'Account sumber dan tujuan tidak boleh sama.',
             ]);
         }
 
@@ -86,9 +108,18 @@ class TransactionService
             'category_id' => null,
             'amount' => $amount,
             'description' => $description,
-            'transaction_date' => $transactionDate,
+            'transaction_date' => $this->parseDate($date),
             'metadata' => $metadata,
         ]);
+    }
+
+    protected function validateAmount(float $amount): void
+    {
+        if ($amount <= 0) {
+            throw ValidationException::withMessages([
+                'amount' => 'Amount harus lebih besar dari 0.',
+            ]);
+        }
     }
 
     protected function validateAccount(
@@ -97,13 +128,15 @@ class TransactionService
     ): void {
         if ($account->user_id !== $user->id) {
             throw ValidationException::withMessages([
-                'account' => 'Account bukan milik user ini.',
+                'account_id' =>
+                    'Account tidak valid.',
             ]);
         }
 
         if (!$account->is_active) {
             throw ValidationException::withMessages([
-                'account' => 'Account sudah tidak aktif.',
+                'account_id' =>
+                    'Account sudah tidak aktif.',
             ]);
         }
     }
@@ -115,29 +148,32 @@ class TransactionService
     ): void {
         if ($category->user_id !== $user->id) {
             throw ValidationException::withMessages([
-                'category' => 'Category bukan milik user ini.',
+                'category_id' =>
+                    'Category tidak valid.',
             ]);
         }
 
         if (!$category->is_active) {
             throw ValidationException::withMessages([
-                'category' => 'Category sudah tidak aktif.',
+                'category_id' =>
+                    'Category sudah tidak aktif.',
             ]);
         }
 
         if ($category->type !== $type) {
             throw ValidationException::withMessages([
-                'category' => "Category harus bertipe {$type}.",
+                'category_id' =>
+                    'Type category tidak sesuai dengan transaksi.',
             ]);
         }
     }
 
-    protected function validateAmount(float $amount): void
+    protected function parseDate($date): string
     {
-        if ($amount <= 0) {
-            throw ValidationException::withMessages([
-                'amount' => 'Amount harus lebih besar dari 0.',
-            ]);
+        if (!$date) {
+            return now()->toDateString();
         }
+
+        return Carbon::parse($date)->toDateString();
     }
 }

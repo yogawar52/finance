@@ -3,68 +3,74 @@
 namespace App\Services;
 
 use App\Models\Account;
+use App\Models\Transaction;
 use Carbon\Carbon;
 
 class BalanceService
 {
     public function getBalance(Account $account): float
     {
-        $balance = (float) $account->initial_balance;
-
-        $balance += $account->transactions()
+        $income = Transaction::query()
+            ->where('account_id', $account->id)
             ->where('type', 'income')
             ->sum('amount');
 
-        $balance -= $account->transactions()
+        $expense = Transaction::query()
+            ->where('account_id', $account->id)
             ->where('type', 'expense')
             ->sum('amount');
 
-        $balance -= $account->transactions()
+        $transferOut = Transaction::query()
+            ->where('account_id', $account->id)
             ->where('type', 'transfer')
             ->sum('amount');
 
-        $balance += $account->transactions()
-            ->where('type', 'adjustment')
-            ->sum('amount');
-
-        $balance += $account->destinationTransactions()
+        $transferIn = Transaction::query()
+            ->where('destination_account_id', $account->id)
             ->where('type', 'transfer')
             ->sum('amount');
 
-        return $balance;
+        return (float) (
+            $income
+            - $expense
+            - $transferOut
+            + $transferIn
+        );
     }
 
     public function getBalanceAt(
         Account $account,
         Carbon $date
     ): float {
-        $balance = (float) $account->initial_balance;
-
-        $balance += $account->transactions()
+        $income = Transaction::query()
+            ->where('account_id', $account->id)
             ->where('type', 'income')
             ->whereDate('transaction_date', '<=', $date)
             ->sum('amount');
 
-        $balance -= $account->transactions()
+        $expense = Transaction::query()
+            ->where('account_id', $account->id)
             ->where('type', 'expense')
             ->whereDate('transaction_date', '<=', $date)
             ->sum('amount');
 
-        $balance -= $account->transactions()
+        $transferOut = Transaction::query()
+            ->where('account_id', $account->id)
             ->where('type', 'transfer')
             ->whereDate('transaction_date', '<=', $date)
             ->sum('amount');
 
-        $balance += $account->transactions()
-            ->where('type', 'adjustment')
-            ->whereDate('transaction_date', '<=', $date)
-            ->sum('amount');
-
-        $balance += $account->destinationTransactions()
+        $transferIn = Transaction::query()
+            ->where('destination_account_id', $account->id)
             ->where('type', 'transfer')
             ->whereDate('transaction_date', '<=', $date)
             ->sum('amount');
 
-        return $balance;
+        return (float) (
+            $income
+            - $expense
+            - $transferOut
+            + $transferIn
+        );
     }
 }

@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\TransactionController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -24,3 +25,8 @@ Route::patch(
     '/accounts/{account}/toggle-status',
     [AccountController::class, 'toggleStatus']
 )->name('accounts.toggle-status');
+
+Route::get(
+    '/transactions',
+    [TransactionController::class, 'index']
+)->name('transactions.index');
