@@ -5,105 +5,91 @@
 
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>
         @yield('title', 'Finance')
     </title>
 
-    @vite([
-        'resources/css/app.css',
-        'resources/js/app.js'
-    ])
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
 </head>
 
 <body class="bg-gray-100 text-gray-900">
 
-<div class="min-h-screen flex">
+    <div class="min-h-screen flex">
 
-    {{-- Sidebar --}}
+        {{-- Sidebar --}}
 
-    <aside class="w-64 bg-white border-r">
+        <aside class="w-64 bg-white border-r">
 
-        <div class="px-6 py-5 border-b">
+            <div class="px-6 py-5 border-b">
 
-            <h1 class="text-xl font-bold">
-                Finance
-            </h1>
+                <h1 class="text-xl font-bold">
+                    Finance
+                </h1>
 
-            <p class="text-sm text-gray-500">
-                Personal Finance
-            </p>
+                <p class="text-sm text-gray-500">
+                    Personal Finance
+                </p>
 
-        </div>
-
-
-        <nav class="p-4 space-y-1">
-
-            <a
-                href="{{ route('dashboard') }}"
-                class="block px-4 py-2 rounded-lg hover:bg-gray-100"
-            >
-                Dashboard
-            </a>
+            </div>
 
 
-            <a
-                href="/accounts"
-                class="block px-4 py-2 rounded-lg hover:bg-gray-100"
-            >
-                Accounts
-            </a>
+            <nav class="p-4 space-y-1">
+
+                <a href="{{ route('dashboard') }}"
+                    class="block px-4 py-2 rounded-lg
+            {{ request()->routeIs('dashboard') ? 'bg-gray-100 font-semibold' : 'hover:bg-gray-100' }}">
+                    Dashboard
+                </a>
 
 
-            <a
-                href="/categories"
-                class="block px-4 py-2 rounded-lg hover:bg-gray-100"
-            >
-                Categories
-            </a>
+                <a href="/accounts"
+                    class="block px-4 py-2 rounded-lg
+            {{ request()->is('accounts*') ? 'bg-gray-100 font-semibold' : 'hover:bg-gray-100' }}">
+                    Accounts
+                </a>
 
 
-            <a
-                href="{{ route('transactions.index') }}"
-                class="block px-4 py-2 rounded-lg hover:bg-gray-100"
-            >
-                Transactions
-            </a>
-
-        </nav>
-
-    </aside>
+                <a href="/categories"
+                    class="block px-4 py-2 rounded-lg
+            {{ request()->is('categories*') ? 'bg-gray-100 font-semibold' : 'hover:bg-gray-100' }}">
+                    Categories
+                </a>
 
 
-    {{-- Main Content --}}
+                <a href="{{ route('transactions.index') }}"
+                    class="block px-4 py-2 rounded-lg
+            {{ request()->is('transactions*') ? 'bg-gray-100 font-semibold' : 'hover:bg-gray-100' }}">
+                    Transactions
+                </a>
 
-    <main class="flex-1">
+            </nav>
 
-        <div class="max-w-7xl mx-auto px-6 py-8">
-
-            @if (session('success'))
-
-                <div
-                    class="mb-6 bg-green-100 text-green-800 px-4 py-3 rounded-lg"
-                >
-                    {{ session('success') }}
-                </div>
-
-            @endif
+        </aside>
 
 
-            @yield('content')
+        {{-- Main Content --}}
 
-        </div>
+        <main class="flex-1">
 
-    </main>
+            <div class="max-w-7xl mx-auto px-6 py-8">
 
-</div>
+                @if (session('success'))
+                    <div class="mb-6 bg-green-100 text-green-800 px-4 py-3 rounded-lg">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+
+                @yield('content')
+
+            </div>
+
+        </main>
+
+    </div>
 
 </body>
 

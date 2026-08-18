@@ -1,6 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+@extends('layouts.app')
+
+@section('title', 'Create Account')
+
+@section('content')
+
     <meta charset="UTF-8">
 
     <meta
@@ -11,7 +14,6 @@
     <title>Add Account</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
 
 <body class="bg-gray-100 text-gray-900">
 
@@ -137,7 +139,7 @@
 
             <button
                 type="submit"
-                class="bg-black text-black px-4 py-2 rounded-lg"
+                class="bg-black text-white px-4 py-2 rounded-lg"
             >
                 Save Account
             </button>
@@ -148,5 +150,4 @@
 
 </div>
 
-</body>
-</html>
+@endsection

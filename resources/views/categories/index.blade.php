@@ -1,21 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.app')
 
-<head>
+@section('title', 'Categories')
 
-    <meta charset="UTF-8">
+@section('content')
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <div class="max-w-5xl mx-auto">
 
-    <title>Categories</title>
-
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-
-</head>
-
-<body class="bg-gray-100 text-gray-900">
-
-    <div class="max-w-5xl mx-auto px-6 py-8">
+        {{-- Header --}}
 
         <div class="flex justify-between items-center mb-6">
 
@@ -31,21 +22,30 @@
 
             </div>
 
-            <a href="{{ route('categories.create') }}" class="bg-black text-white px-4 py-2 rounded-lg">
+            <a
+                href="{{ route('categories.create') }}"
+                class="bg-black text-white px-4 py-2 rounded-lg"
+            >
                 + Add Category
             </a>
 
         </div>
 
 
+        {{-- Success Message --}}
+
         @if (session('success'))
+
             <div class="bg-green-100 text-green-800 px-4 py-3 rounded-lg mb-6">
 
                 {{ session('success') }}
 
             </div>
+
         @endif
 
+
+        {{-- Validation Errors --}}
 
         @if ($errors->any())
 
@@ -54,7 +54,11 @@
                 <ul class="list-disc list-inside">
 
                     @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
+
+                        <li>
+                            {{ $error }}
+                        </li>
+
                     @endforeach
 
                 </ul>
@@ -64,11 +68,15 @@
         @endif
 
 
+        {{-- Categories --}}
+
         <div class="space-y-6">
 
             @forelse ($categories as $category)
 
                 <div class="bg-white rounded-xl shadow p-5">
+
+                    {{-- Parent Category Header --}}
 
                     <div class="flex justify-between items-center">
 
@@ -84,123 +92,197 @@
 
                         </div>
 
+
                         <div class="flex items-center gap-4">
 
                             @if ($category->is_active)
+
                                 <span class="text-sm text-green-600">
                                     Active
                                 </span>
 
-                                <form action="{{ route('categories.toggle-status', $category->id) }}" method="POST">
+                                <form
+                                    action="{{ route(
+                                        'categories.toggle-status',
+                                        $category->id
+                                    ) }}"
+                                    method="POST"
+                                >
+
                                     @csrf
                                     @method('PATCH')
 
-                                    <button type="submit" class="text-sm text-red-600 underline">
+                                    <button
+                                        type="submit"
+                                        class="text-sm text-red-600 underline"
+                                    >
                                         Deactivate
                                     </button>
+
                                 </form>
+
                             @else
+
                                 <span class="text-sm text-gray-400">
                                     Inactive
                                 </span>
 
-                                <form action="{{ route('categories.toggle-status', $category->id) }}" method="POST">
+                                <form
+                                    action="{{ route(
+                                        'categories.toggle-status',
+                                        $category->id
+                                    ) }}"
+                                    method="POST"
+                                >
+
                                     @csrf
                                     @method('PATCH')
 
-                                    <button type="submit" class="text-sm text-green-600 underline">
+                                    <button
+                                        type="submit"
+                                        class="text-sm text-green-600 underline"
+                                    >
                                         Activate
                                     </button>
+
                                 </form>
+
                             @endif
 
-                            <a href="{{ route('categories.edit', $category->id) }}" class="text-sm underline">
+
+                            <a
+                                href="{{ route(
+                                    'categories.edit',
+                                    $category->id
+                                ) }}"
+                                class="text-sm underline"
+                            >
                                 Edit
                             </a>
 
                         </div>
 
+                    </div>
 
-                        @if ($category->children->count())
-                            <div class="mt-4 ml-4">
 
-                                <p class="text-sm font-medium mb-2">
-                                    Subcategories
-                                </p>
+                    {{-- Subcategories --}}
 
-                                <div class="space-y-2">
+                    @if ($category->children->count())
 
-                                    @foreach ($category->children as $child)
-                                        <div class="flex justify-between items-center bg-gray-50 rounded-lg px-4 py-2">
+                        <div class="mt-4 ml-4">
 
-                                            <span>
-                                                {{ $child->name }}
-                                            </span>
+                            <p class="text-sm font-medium mb-2">
+                                Subcategories
+                            </p>
 
-                                            <div class="flex items-center gap-4">
 
-                                                @if ($child->is_active)
-                                                    <span class="text-sm text-green-600">
-                                                        Active
-                                                    </span>
+                            <div class="space-y-2">
 
-                                                    <form action="{{ route('categories.toggle-status', $child->id) }}"
-                                                        method="POST">
-                                                        @csrf
-                                                        @method('PATCH')
+                                @foreach ($category->children as $child)
 
-                                                        <button type="submit" class="text-sm text-red-600 underline">
-                                                            Deactivate
-                                                        </button>
+                                    <div class="flex justify-between items-center bg-gray-50 rounded-lg px-4 py-2">
 
-                                                    </form>
-                                                @else
-                                                    <span class="text-sm text-gray-400">
-                                                        Inactive
-                                                    </span>
+                                        <span>
+                                            {{ $child->name }}
+                                        </span>
 
-                                                    <form action="{{ route('categories.toggle-status', $child->id) }}"
-                                                        method="POST">
-                                                        @csrf
-                                                        @method('PATCH')
 
-                                                        <button type="submit" class="text-sm text-green-600 underline">
-                                                            Activate
-                                                        </button>
+                                        <div class="flex items-center gap-4">
 
-                                                    </form>
-                                                @endif
+                                            @if ($child->is_active)
 
-                                                <a href="{{ route('categories.edit', $child->id) }}"
-                                                    class="text-sm underline">
-                                                    Edit
-                                                </a>
+                                                <span class="text-sm text-green-600">
+                                                    Active
+                                                </span>
 
-                                            </div>
+                                                <form
+                                                    action="{{ route(
+                                                        'categories.toggle-status',
+                                                        $child->id
+                                                    ) }}"
+                                                    method="POST"
+                                                >
+
+                                                    @csrf
+                                                    @method('PATCH')
+
+                                                    <button
+                                                        type="submit"
+                                                        class="text-sm text-red-600 underline"
+                                                    >
+                                                        Deactivate
+                                                    </button>
+
+                                                </form>
+
+                                            @else
+
+                                                <span class="text-sm text-gray-400">
+                                                    Inactive
+                                                </span>
+
+                                                <form
+                                                    action="{{ route(
+                                                        'categories.toggle-status',
+                                                        $child->id
+                                                    ) }}"
+                                                    method="POST"
+                                                >
+
+                                                    @csrf
+                                                    @method('PATCH')
+
+                                                    <button
+                                                        type="submit"
+                                                        class="text-sm text-green-600 underline"
+                                                    >
+                                                        Activate
+                                                    </button>
+
+                                                </form>
+
+                                            @endif
+
+
+                                            <a
+                                                href="{{ route(
+                                                    'categories.edit',
+                                                    $child->id
+                                                ) }}"
+                                                class="text-sm underline"
+                                            >
+                                                Edit
+                                            </a>
 
                                         </div>
-                                    @endforeach
 
-                                </div>
+                                    </div>
+
+                                @endforeach
 
                             </div>
-                        @else
-                            <p class="text-sm text-gray-400 mt-4">
-                                No subcategories.
-                            </p>
-                        @endif
 
-                    </div>
+                        </div>
 
-                @empty
+                    @else
 
-                    <div class="bg-white rounded-xl shadow p-6 text-center">
-
-                        <p class="text-gray-500">
-                            Belum ada category.
+                        <p class="text-sm text-gray-400 mt-4">
+                            No subcategories.
                         </p>
 
-                    </div>
+                    @endif
+
+                </div>
+
+            @empty
+
+                <div class="bg-white rounded-xl shadow p-6 text-center">
+
+                    <p class="text-gray-500">
+                        Belum ada category.
+                    </p>
+
+                </div>
 
             @endforelse
 
@@ -208,6 +290,4 @@
 
     </div>
 
-</body>
-
-</html>
+@endsection

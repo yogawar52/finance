@@ -1,7 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.app')
 
-<head>
+@section('title', 'Edit Account')
+
+@section('content')
 
     <meta charset="UTF-8">
 
@@ -14,7 +15,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-</head>
+
 
 <body class="bg-gray-100 text-gray-900">
 
@@ -166,6 +167,4 @@
 
 </div>
 
-</body>
-
-</html>
+@endsection

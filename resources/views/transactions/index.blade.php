@@ -4,219 +4,232 @@
 
 @section('content')
 
-<body class="bg-gray-100 text-gray-900">
+    <body class="bg-gray-100 text-gray-900">
 
-    <div class="max-w-6xl mx-auto px-6 py-8">
+        <div class="max-w-6xl mx-auto px-6 py-8">
 
-        <div class="flex justify-between items-center mb-6">
+            <div class="flex justify-between items-center mb-6">
 
-            <div>
+                <div>
 
-                <h1 class="text-2xl font-bold">
-                    Transactions
-                </h1>
+                    <h1 class="text-2xl font-bold">
+                        Transactions
+                    </h1>
 
-                <p class="text-gray-500">
-                    Transaction history
-                </p>
+                    <p class="text-gray-500">
+                        Transaction history
+                    </p>
 
-            </div>
-
-            <a href="#" class="bg-black text-white px-4 py-2 rounded-lg">
-                Add Transaction
-            </a>
-
-        </div>
-
-
-        @if (session('success'))
-            <div class="mb-6 bg-green-100 text-green-800 px-4 py-3 rounded-lg">
-                {{ session('success') }}
-            </div>
-        @endif
-
-
-        <div class="bg-white rounded-xl shadow overflow-hidden">
-
-            @if ($transactions->isEmpty())
-
-                <div class="p-8 text-center text-gray-500">
-                    Belum ada transaksi.
                 </div>
-            @else
-                <div class="overflow-x-auto">
 
-                    <table class="w-full text-sm">
+                <a href="#" class="bg-black text-white px-4 py-2 rounded-lg">
+                    Add Transaction
+                </a>
 
-                        <thead class="bg-gray-50">
+            </div>
 
-                            <tr>
 
-                                <th class="text-left px-6 py-4">
-                                    Date
-                                </th>
+            @if (session('success'))
+                <div class="mb-6 bg-green-100 text-green-800 px-4 py-3 rounded-lg">
+                    {{ session('success') }}
+                </div>
+            @endif
 
-                                <th class="text-left px-6 py-4">
-                                    Type
-                                </th>
 
-                                <th class="text-left px-6 py-4">
-                                    Description
-                                </th>
+            <div class="bg-white rounded-xl shadow overflow-hidden">
 
-                                <th class="text-left px-6 py-4">
-                                    Category
-                                </th>
+                @if ($transactions->isEmpty())
 
-                                <th class="text-left px-6 py-4">
-                                    Account
-                                </th>
+                    <div class="p-8 text-center text-gray-500">
+                        Belum ada transaksi.
+                    </div>
+                @else
+                    <div class="overflow-x-auto">
 
-                                <th class="text-right px-6 py-4">
-                                    Amount
-                                </th>
+                        <table class="w-full text-sm">
 
-                                <th class="text-right px-6 py-4">
-                                    Actions
-                                </th>
+                            <thead class="bg-gray-50">
 
-                            </tr>
-
-                        </thead>
-
-                        <tbody class="divide-y">
-
-                            @foreach ($transactions as $transaction)
                                 <tr>
 
-                                    {{-- Date --}}
+                                    <th class="text-left px-6 py-4">
+                                        Date
+                                    </th>
 
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <th class="text-left px-6 py-4">
+                                        Type
+                                    </th>
 
-                                        {{ $transaction->transaction_date->format('d M Y') }}
+                                    <th class="text-left px-6 py-4">
+                                        Description
+                                    </th>
 
-                                    </td>
+                                    <th class="text-left px-6 py-4">
+                                        Category
+                                    </th>
 
+                                    <th class="text-left px-6 py-4">
+                                        Account
+                                    </th>
 
-                                    {{-- Type --}}
+                                    <th class="text-right px-6 py-4">
+                                        Amount
+                                    </th>
 
-                                    <td class="px-6 py-4">
+                                    <th class="text-right px-6 py-4">
+                                        Actions
+                                    </th>
 
-                                        @if ($transaction->type === 'income')
-                                            <span class="font-medium">
-                                                Income
-                                            </span>
-                                        @elseif ($transaction->type === 'expense')
-                                            <span class="font-medium">
-                                                Expense
-                                            </span>
-                                        @else
-                                            <span class="font-medium">
-                                                Transfer
-                                            </span>
-                                        @endif
+                                </tr>
 
-                                    </td>
+                            </thead>
 
+                            <tbody class="divide-y">
 
-                                    {{-- Description --}}
+                                @foreach ($transactions as $transaction)
+                                    <tr>
 
-                                    <td class="px-6 py-4">
+                                        {{-- Date --}}
 
-                                        {{ $transaction->description ?? '-' }}
+                                        <td class="px-6 py-4 whitespace-nowrap">
 
-                                        @if ($transaction->metadata['special_type'] ?? null)
-                                            <div class="text-xs text-gray-500 mt-1">
+                                            {{ $transaction->transaction_date->format('d M Y') }}
 
-                                                {{ $transaction->metadata['special_type'] }}
-
-                                            </div>
-                                        @endif
-
-                                    </td>
-
-
-                                    {{-- Category --}}
-
-                                    <td class="px-6 py-4">
-
-                                        {{ $transaction->category?->name ?? '-' }}
-
-                                    </td>
+                                        </td>
 
 
-                                    {{-- Account --}}
+                                        {{-- Type --}}
 
-                                    <td class="px-6 py-4">
+                                        <td class="px-6 py-4">
 
-                                        @if ($transaction->type === 'transfer')
-                                            {{ $transaction->account->name }}
+                                            @if ($transaction->type === 'income')
+                                                <span class="font-medium">
+                                                    Income
+                                                </span>
+                                            @elseif ($transaction->type === 'expense')
+                                                <span class="font-medium">
+                                                    Expense
+                                                </span>
+                                            @else
+                                                <span class="font-medium">
+                                                    Transfer
+                                                </span>
+                                            @endif
 
-                                            →
-
-                                            {{ $transaction->destinationAccount->name }}
-                                        @else
-                                            {{ $transaction->account->name }}
-                                        @endif
-
-                                    </td>
+                                        </td>
 
 
-                                    {{-- Amount --}}
+                                        {{-- Description --}}
 
-                                    <td class="px-6 py-4 text-right whitespace-nowrap">
+                                        <td class="px-6 py-4">
 
-                                        Rp
-                                        {{ number_format($transaction->amount, 0, ',', '.') }}
+                                            {{ $transaction->description ?? '-' }}
 
-                                    </td>
+                                            @if ($transaction->metadata['special_type'] ?? null)
+                                                <div class="text-xs text-gray-500 mt-1">
 
-                                    <td class="px-6 py-4 text-right whitespace-nowrap">
+                                                    {{ $transaction->metadata['special_type'] }}
 
-                                        <div class="flex justify-end gap-2">
+                                                </div>
+                                            @endif
 
-                                            <a href="{{ route('transactions.edit', $transaction->id) }}"
-                                                class="px-3 py-1 border rounded-lg">
-                                                Edit
-                                            </a>
+                                        </td>
 
-                                            <form
-                                                action="{{ route('transactions.destroy', $transaction->id) }}"
-                                                method="POST"
-                                                onsubmit="return confirm(
+
+                                        {{-- Category --}}
+
+                                        <td class="px-6 py-4">
+
+                                            {{ $transaction->category?->name ?? '-' }}
+
+                                        </td>
+
+
+                                        {{-- Account --}}
+
+                                        <td class="px-6 py-4">
+
+                                            @if ($transaction->type === 'transfer')
+                                                {{ $transaction->account->name }}
+
+                                                →
+
+                                                {{ $transaction->destinationAccount->name }}
+                                            @else
+                                                {{ $transaction->account->name }}
+                                            @endif
+
+                                        </td>
+
+
+                                        {{-- Amount --}}
+
+                                        <td class="px-6 py-4 text-right whitespace-nowrap">
+
+                                            @if ($transaction->type === 'income')
+                                                <span class="text-green-600 font-medium">
+                                                    + Rp
+                                                    {{ number_format($transaction->amount, 0, ',', '.') }}
+                                                </span>
+                                            @elseif ($transaction->type === 'expense')
+                                                <span class="text-red-600 font-medium">
+                                                    - Rp
+                                                    {{ number_format($transaction->amount, 0, ',', '.') }}
+                                                </span>
+                                            @else
+                                                <span class="text-gray-600 font-medium">
+                                                    Rp
+                                                    {{ number_format($transaction->amount, 0, ',', '.') }}
+                                                </span>
+                                            @endif
+
+                                        </td>
+
+                                        <td class="px-6 py-4 text-right whitespace-nowrap">
+
+                                            <div class="flex justify-end gap-2">
+
+                                                <a href="{{ route('transactions.edit', $transaction->id) }}"
+                                                    class="px-3 py-1 border rounded-lg">
+                                                    Edit
+                                                </a>
+
+                                                <form action="{{ route('transactions.destroy', $transaction->id) }}"
+                                                    method="POST"
+                                                    onsubmit="return confirm(
                 'Hapus transaksi ini?'
             )">
 
-                                                @csrf
-                                                @method('DELETE')
+                                                    @csrf
+                                                    @method('DELETE')
 
-                                                <button type="submit" class="px-3 py-1 border rounded-lg">
-                                                    Delete
-                                                </button>
+                                                    <button type="submit" class="px-3 py-1 border rounded-lg">
+                                                        Delete
+                                                    </button>
 
-                                            </form>
+                                                </form>
 
-                                        </div>
+                                            </div>
 
-                                    </td>
+                                        </td>
 
-                                </tr>
-                            @endforeach
+                                    </tr>
+                                @endforeach
 
-                        </tbody>
+                            </tbody>
 
-                    </table>
+                        </table>
 
-                </div>
+                    </div>
 
-            @endif
+                @endif
+
+            </div>
 
         </div>
 
-    </div>
+    </body>
 
-</body>
-
-</html>
+    </html>
 
 @endsection
