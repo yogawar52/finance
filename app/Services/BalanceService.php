@@ -26,12 +26,16 @@ class BalanceService
             ->sum('amount');
 
         $transferIn = Transaction::query()
-            ->where('destination_account_id', $account->id)
+            ->where(
+                'destination_account_id',
+                $account->id
+            )
             ->where('type', 'transfer')
             ->sum('amount');
 
         return (float) (
-            $income
+            $account->initial_balance
+            + $income
             - $expense
             - $transferOut
             + $transferIn
@@ -45,29 +49,49 @@ class BalanceService
         $income = Transaction::query()
             ->where('account_id', $account->id)
             ->where('type', 'income')
-            ->whereDate('transaction_date', '<=', $date)
+            ->whereDate(
+                'transaction_date',
+                '<=',
+                $date
+            )
             ->sum('amount');
 
         $expense = Transaction::query()
             ->where('account_id', $account->id)
             ->where('type', 'expense')
-            ->whereDate('transaction_date', '<=', $date)
+            ->whereDate(
+                'transaction_date',
+                '<=',
+                $date
+            )
             ->sum('amount');
 
         $transferOut = Transaction::query()
             ->where('account_id', $account->id)
             ->where('type', 'transfer')
-            ->whereDate('transaction_date', '<=', $date)
+            ->whereDate(
+                'transaction_date',
+                '<=',
+                $date
+            )
             ->sum('amount');
 
         $transferIn = Transaction::query()
-            ->where('destination_account_id', $account->id)
+            ->where(
+                'destination_account_id',
+                $account->id
+            )
             ->where('type', 'transfer')
-            ->whereDate('transaction_date', '<=', $date)
+            ->whereDate(
+                'transaction_date',
+                '<=',
+                $date
+            )
             ->sum('amount');
 
         return (float) (
-            $income
+            $account->initial_balance
+            + $income
             - $expense
             - $transferOut
             + $transferIn
