@@ -1,62 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Finance Dashboard</title>
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite([
+        'resources/css/app.css',
+        'resources/js/app.js'
+    ])
+
 </head>
 
 <body class="bg-gray-100 text-gray-900">
 
 <div class="max-w-6xl mx-auto px-6 py-8">
 
-    <h1 class="text-2xl font-bold mb-6">
-        Finance Dashboard
-    </h1>
+    {{-- Header --}}
 
-    {{-- Total Balance --}}
-    <div class="bg-white rounded-xl shadow p-6 mb-6">
-        <p class="text-sm text-gray-500">
-            Total Balance
-        </p>
+    <div class="flex justify-between items-center mb-8">
 
-        <h2 class="text-3xl font-bold mt-2">
-            Rp {{ number_format($totalBalance, 0, ',', '.') }}
-        </h2>
+        <div>
+
+            <h1 class="text-2xl font-bold">
+                Finance Dashboard
+            </h1>
+
+            <p class="text-gray-500">
+                Financial overview
+            </p>
+
+        </div>
+
+        <a
+            href="{{ route('transactions.create') }}"
+            class="bg-black text-white px-4 py-2 rounded-lg"
+        >
+            Add Transaction
+        </a>
+
+    </div>
+
+
+    {{-- Summary --}}
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+
+        {{-- Income --}}
+
+        <div class="bg-white rounded-xl shadow p-6">
+
+            <p class="text-sm text-gray-500">
+                Income This Month
+            </p>
+
+            <p class="text-2xl font-bold mt-2">
+                Rp {{ number_format(
+                    $income,
+                    0,
+                    ',',
+                    '.'
+                ) }}
+            </p>
+
+        </div>
+
+
+        {{-- Expense --}}
+
+        <div class="bg-white rounded-xl shadow p-6">
+
+            <p class="text-sm text-gray-500">
+                Expense This Month
+            </p>
+
+            <p class="text-2xl font-bold mt-2">
+                Rp {{ number_format(
+                    $expense,
+                    0,
+                    ',',
+                    '.'
+                ) }}
+            </p>
+
+        </div>
+
+
+        {{-- Net --}}
+
+        <div class="bg-white rounded-xl shadow p-6">
+
+            <p class="text-sm text-gray-500">
+                Net This Month
+            </p>
+
+            <p class="text-2xl font-bold mt-2">
+
+                Rp {{ number_format(
+                    $income - $expense,
+                    0,
+                    ',',
+                    '.'
+                ) }}
+
+            </p>
+
+        </div>
+
     </div>
 
 
     {{-- Accounts --}}
+
     <div class="mb-8">
 
-        <h2 class="text-lg font-semibold mb-4">
-            Accounts
-        </h2>
+        <div class="flex justify-between items-center mb-4">
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <h2 class="text-lg font-bold">
+                Accounts
+            </h2>
+
+            <a
+                href="/accounts"
+                class="text-sm underline"
+            >
+                Manage Accounts
+            </a>
+
+        </div>
+
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
 
             @foreach ($accounts as $account)
 
                 <div class="bg-white rounded-xl shadow p-5">
 
                     <p class="text-sm text-gray-500">
-                        {{ $account->type }}
+                        {{ $account->name }}
                     </p>
 
-                    <h3 class="font-semibold text-lg">
-                        {{ $account->name }}
-                    </h3>
+                    <p class="text-xl font-bold mt-2">
 
-                    <p class="text-xl font-bold mt-3">
                         Rp {{ number_format(
-                            $accountBalances[$account->id],
+                            $balances[$account->id],
                             0,
                             ',',
                             '.'
                         ) }}
+
                     </p>
 
                 </div>
@@ -69,83 +168,135 @@
 
 
     {{-- Recent Transactions --}}
+
     <div>
 
-        <h2 class="text-lg font-semibold mb-4">
-            Recent Transactions
-        </h2>
+        <div class="flex justify-between items-center mb-4">
+
+            <h2 class="text-lg font-bold">
+                Recent Transactions
+            </h2>
+
+            <a
+                href="{{ route('transactions.index') }}"
+                class="text-sm underline"
+            >
+                View All
+            </a>
+
+        </div>
+
 
         <div class="bg-white rounded-xl shadow overflow-hidden">
 
-            <table class="w-full">
+            @if ($recentTransactions->isEmpty())
 
-                <thead class="bg-gray-50">
+                <div class="p-8 text-center text-gray-500">
+                    Belum ada transaksi.
+                </div>
 
-                    <tr>
-                        <th class="text-left px-6 py-3 text-sm">
-                            Date
-                        </th>
+            @else
 
-                        <th class="text-left px-6 py-3 text-sm">
-                            Description
-                        </th>
+                <div class="overflow-x-auto">
 
-                        <th class="text-left px-6 py-3 text-sm">
-                            Account
-                        </th>
+                    <table class="w-full text-sm">
 
-                        <th class="text-right px-6 py-3 text-sm">
-                            Amount
-                        </th>
-                    </tr>
+                        <thead class="bg-gray-50">
 
-                </thead>
+                            <tr>
 
-                <tbody>
+                                <th class="text-left px-6 py-4">
+                                    Date
+                                </th>
 
-                    @foreach ($transactions as $transaction)
+                                <th class="text-left px-6 py-4">
+                                    Description
+                                </th>
 
-                        <tr class="border-t">
+                                <th class="text-left px-6 py-4">
+                                    Account
+                                </th>
 
-                            <td class="px-6 py-4">
-                                {{ $transaction->transaction_date }}
-                            </td>
+                                <th class="text-right px-6 py-4">
+                                    Amount
+                                </th>
 
-                            <td class="px-6 py-4">
-                                {{ $transaction->description }}
-                            </td>
+                            </tr>
 
-                            <td class="px-6 py-4">
-                                {{ $transaction->account->name }}
-                            </td>
+                        </thead>
 
-                            <td class="px-6 py-4 text-right font-semibold">
+                        <tbody class="divide-y">
 
-                                @if ($transaction->type === 'expense')
-                                    <span class="text-red-600">
-                                        -Rp {{ number_format($transaction->amount, 0, ',', '.') }}
-                                    </span>
+                            @foreach (
+                                $recentTransactions
+                                as $transaction
+                            )
 
-                                @elseif ($transaction->type === 'income')
-                                    <span class="text-green-600">
-                                        +Rp {{ number_format($transaction->amount, 0, ',', '.') }}
-                                    </span>
+                                <tr>
 
-                                @else
-                                    <span>
-                                        Rp {{ number_format($transaction->amount, 0, ',', '.') }}
-                                    </span>
-                                @endif
+                                    <td class="px-6 py-4">
 
-                            </td>
+                                        {{ $transaction->transaction_date
+                                            ->format('d M Y') }}
 
-                        </tr>
+                                    </td>
 
-                    @endforeach
 
-                </tbody>
+                                    <td class="px-6 py-4">
 
-            </table>
+                                        {{ $transaction->description ?? '-' }}
+
+                                    </td>
+
+
+                                    <td class="px-6 py-4">
+
+                                        @if (
+                                            $transaction->type
+                                            === 'transfer'
+                                        )
+
+                                            {{ $transaction->account->name }}
+
+                                            →
+
+                                            {{ $transaction
+                                                ->destinationAccount
+                                                ->name }}
+
+                                        @else
+
+                                            {{ $transaction
+                                                ->account
+                                                ->name }}
+
+                                        @endif
+
+                                    </td>
+
+
+                                    <td class="px-6 py-4 text-right">
+
+                                        Rp {{ number_format(
+                                            $transaction->amount,
+                                            0,
+                                            ',',
+                                            '.'
+                                        ) }}
+
+                                    </td>
+
+                                </tr>
+
+                            @endforeach
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            @endif
 
         </div>
 
@@ -154,4 +305,5 @@
 </div>
 
 </body>
+
 </html>
