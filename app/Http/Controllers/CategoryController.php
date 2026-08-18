@@ -139,4 +139,24 @@ class CategoryController extends Controller
             ->route('categories.index')
             ->with('success', 'Category berhasil dibuat.');
     }
+
+    public function toggleStatus(int $category)
+    {
+        $user = User::where('email', 'yoga@example.com')->firstOrFail();
+
+        $category = $user->categories()->findOrFail($category);
+
+        $category->update([
+            'is_active' => ! $category->is_active,
+        ]);
+
+        return redirect()
+            ->route('categories.index')
+            ->with(
+                'success',
+                $category->is_active
+                    ? 'Category berhasil diaktifkan.'
+                    : 'Category berhasil dinonaktifkan.'
+            );
+    }
 }

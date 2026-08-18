@@ -34,3 +34,8 @@ Route::patch(
     '/accounts/{account}/toggle-status',
     [AccountController::class, 'toggleStatus']
 )->name('accounts.toggle-status');
+
+Route::patch(
+    '/categories/{category}/toggle-status',
+    [CategoryController::class, 'toggleStatus']
+)->name('categories.toggle-status');
