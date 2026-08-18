@@ -240,14 +240,6 @@ class TransactionController extends Controller
         int $id,
         TransactionService $transactionService
     ) {
-        $user = User::where(
-            'email',
-            'yoga@example.com'
-        )->firstOrFail();
-
-        $transaction = $user->transactions()
-            ->findOrFail($id);
-
         $validated = $request->validate([
             'type' => [
                 'required',
@@ -287,14 +279,13 @@ class TransactionController extends Controller
             ],
         ]);
 
-        /*
-    |--------------------------------------------------------------------------
-    | Untuk sementara kita hapus transaksi lama,
-    | kemudian buat transaksi baru melalui Service.
-    |--------------------------------------------------------------------------
-    */
+        $user = User::where(
+            'email',
+            'yoga@example.com'
+        )->firstOrFail();
 
-        $transaction->delete();
+        $transaction = $user->transactions()
+            ->findOrFail($id);
 
         $account = $user->accounts()
             ->findOrFail(
@@ -310,71 +301,28 @@ class TransactionController extends Controller
                 );
         }
 
-        if ($validated['type'] === 'income') {
+        $destinationAccount = null;
 
-            if (!$category) {
-                return back()
-                    ->withErrors([
-                        'category_id' =>
-                        'Category wajib dipilih untuk income.',
-                    ])
-                    ->withInput();
-            }
-
-            $transactionService->createIncome(
-                $user,
-                $account,
-                $category,
-                (float) $validated['amount'],
-                $validated['description'] ?? null,
-                $validated['transaction_date']
-            );
-        } elseif ($validated['type'] === 'expense') {
-
-            if (!$category) {
-                return back()
-                    ->withErrors([
-                        'category_id' =>
-                        'Category wajib dipilih untuk expense.',
-                    ])
-                    ->withInput();
-            }
-
-            $transactionService->createExpense(
-                $user,
-                $account,
-                $category,
-                (float) $validated['amount'],
-                $validated['description'] ?? null,
-                $validated['transaction_date']
-            );
-        } else {
-
-            if (
-                empty($validated['destination_account_id'])
-            ) {
-                return back()
-                    ->withErrors([
-                        'destination_account_id' =>
-                        'Account tujuan wajib dipilih untuk transfer.',
-                    ])
-                    ->withInput();
-            }
-
-            $destinationAccount =
-                $user->accounts()->findOrFail(
+        if (
+            !empty($validated['destination_account_id'])
+        ) {
+            $destinationAccount = $user->accounts()
+                ->findOrFail(
                     $validated['destination_account_id']
                 );
-
-            $transactionService->createTransfer(
-                $user,
-                $account,
-                $destinationAccount,
-                (float) $validated['amount'],
-                $validated['description'] ?? null,
-                $validated['transaction_date']
-            );
         }
+
+        $transactionService->updateTransaction(
+            $user,
+            $transaction,
+            $account,
+            $destinationAccount,
+            $category,
+            $validated['type'],
+            (float) $validated['amount'],
+            $validated['description'] ?? null,
+            $validated['transaction_date']
+        );
 
         return redirect()
             ->route('transactions.index')

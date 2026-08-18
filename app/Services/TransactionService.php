@@ -73,6 +73,115 @@ class TransactionService
         ]);
     }
 
+    public function updateTransaction(
+        User $user,
+        Transaction $transaction,
+        Account $account,
+        ?Account $destinationAccount,
+        ?Category $category,
+        string $type,
+        float $amount,
+        ?string $description = null,
+        $date = null,
+        ?array $metadata = null,
+    ): Transaction {
+        if ($transaction->user_id !== $user->id) {
+            throw ValidationException::withMessages([
+                'transaction' => 'Transaction tidak valid.',
+            ]);
+        }
+
+        $this->validateAmount($amount);
+
+        $this->validateAccount(
+            $user,
+            $account
+        );
+
+        if ($type === 'income') {
+
+            if (!$category) {
+                throw ValidationException::withMessages([
+                    'category_id' =>
+                    'Category wajib dipilih untuk income.',
+                ]);
+            }
+
+            $this->validateCategory(
+                $user,
+                $category,
+                'income'
+            );
+
+            $destinationAccount = null;
+            $metadata = $metadata ?? $transaction->metadata;
+        } elseif ($type === 'expense') {
+
+            if (!$category) {
+                throw ValidationException::withMessages([
+                    'category_id' =>
+                    'Category wajib dipilih untuk expense.',
+                ]);
+            }
+
+            $this->validateCategory(
+                $user,
+                $category,
+                'expense'
+            );
+
+            $destinationAccount = null;
+            $metadata = $metadata ?? $transaction->metadata;
+        } elseif ($type === 'transfer') {
+
+            if (!$destinationAccount) {
+                throw ValidationException::withMessages([
+                    'destination_account_id' =>
+                    'Account tujuan wajib dipilih untuk transfer.',
+                ]);
+            }
+
+            $this->validateAccount(
+                $user,
+                $destinationAccount
+            );
+
+            if (
+                $account->id ===
+                $destinationAccount->id
+            ) {
+                throw ValidationException::withMessages([
+                    'destination_account_id' =>
+                    'Account sumber dan tujuan tidak boleh sama.',
+                ]);
+            }
+
+            $category = null;
+
+            $metadata = $metadata ?? $transaction->metadata;
+        } else {
+
+            throw ValidationException::withMessages([
+                'type' => 'Type transaction tidak valid.',
+            ]);
+        }
+
+        $transaction->update([
+            'type' => $type,
+            'account_id' => $account->id,
+            'destination_account_id' =>
+            $destinationAccount?->id,
+            'category_id' => $category?->id,
+            'amount' => $amount,
+            'description' => $description,
+            'transaction_date' =>
+            $this->parseDate($date),
+            'metadata' => $metadata,
+        ]);
+
+        return $transaction->fresh();
+    }
+
     public function createTransfer(
         User $user,
         Account $sourceAccount,
@@ -97,7 +206,7 @@ class TransactionService
         if ($sourceAccount->id === $destinationAccount->id) {
             throw ValidationException::withMessages([
                 'destination_account_id' =>
-                    'Account sumber dan tujuan tidak boleh sama.',
+                'Account sumber dan tujuan tidak boleh sama.',
             ]);
         }
 
@@ -129,14 +238,14 @@ class TransactionService
         if ($account->user_id !== $user->id) {
             throw ValidationException::withMessages([
                 'account_id' =>
-                    'Account tidak valid.',
+                'Account tidak valid.',
             ]);
         }
 
         if (!$account->is_active) {
             throw ValidationException::withMessages([
                 'account_id' =>
-                    'Account sudah tidak aktif.',
+                'Account sudah tidak aktif.',
             ]);
         }
     }
@@ -149,21 +258,21 @@ class TransactionService
         if ($category->user_id !== $user->id) {
             throw ValidationException::withMessages([
                 'category_id' =>
-                    'Category tidak valid.',
+                'Category tidak valid.',
             ]);
         }
 
         if (!$category->is_active) {
             throw ValidationException::withMessages([
                 'category_id' =>
-                    'Category sudah tidak aktif.',
+                'Category sudah tidak aktif.',
             ]);
         }
 
         if ($category->type !== $type) {
             throw ValidationException::withMessages([
                 'category_id' =>
-                    'Type category tidak sesuai dengan transaksi.',
+                'Type category tidak sesuai dengan transaksi.',
             ]);
         }
     }
