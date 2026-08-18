@@ -1,17 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.app')
 
-<head>
+@section('title', 'Transactions')
 
-    <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Transactions</title>
-
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-
-</head>
+@section('content')
 
 <body class="bg-gray-100 text-gray-900">
 
@@ -227,3 +218,5 @@
 </body>
 
 </html>
+
+@endsection

@@ -1,5 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.app')
+
+@section('title', 'Add Transaction')
+
+@section('content')
 
 <head>
 
@@ -392,3 +395,5 @@
 </body>
 
 </html>
+
+@endsection
