@@ -5,11 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Services\TransactionService;
 use Illuminate\Http\Request;
+use App\Services\BalanceService;
 
 class TransactionController extends Controller
 {
-    public function index(Request $request)
-    {
+    public function index(
+        Request $request,
+        BalanceService $balanceService
+    ) {
         $user = User::where(
             'email',
             'yoga@example.com'
@@ -18,6 +21,22 @@ class TransactionController extends Controller
         $accounts = $user->accounts()
             ->orderBy('name')
             ->get();
+
+        $selectedAccount = null;
+        $selectedAccountBalance = null;
+
+        if ($request->filled('account_id')) {
+
+            $selectedAccount = $user->accounts()
+                ->find($request->input('account_id'));
+
+            if ($selectedAccount) {
+                $selectedAccountBalance =
+                    $balanceService->getBalance(
+                        $selectedAccount
+                    );
+            }
+        }
 
         $categories = $user->categories()
             ->with('parent')
@@ -97,17 +116,33 @@ class TransactionController extends Controller
             );
         }
 
+        $totalIncome = (clone $query)
+            ->where('type', 'income')
+            ->sum('amount');
+
+        $totalExpense = (clone $query)
+            ->where('type', 'expense')
+            ->sum('amount');
+
+        $netAmount = $totalIncome - $totalExpense;
+
         $transactions = $query
             ->orderByDesc('transaction_date')
             ->orderByDesc('id')
-            ->get();
+            ->paginate(10)
+            ->withQueryString();
 
         return view(
             'transactions.index',
             compact(
                 'transactions',
                 'accounts',
-                'categories'
+                'categories',
+                'totalIncome',
+                'totalExpense',
+                'netAmount',
+                'selectedAccount',
+                'selectedAccountBalance'
             )
         );
     }
