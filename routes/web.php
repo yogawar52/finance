@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\CategoryController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -21,15 +22,19 @@ Route::resource('accounts', AccountController::class)
         'update',
     ]);
 
+Route::resource('categories', CategoryController::class)
+    ->only([
+        'index',
+        'create',
+        'store',
+        'edit',
+        'update',
+    ]);
+
 Route::patch(
     '/accounts/{account}/toggle-status',
     [AccountController::class, 'toggleStatus']
 )->name('accounts.toggle-status');
-
-Route::get(
-    '/transactions',
-    [TransactionController::class, 'index']
-)->name('transactions.index');
 
 Route::get(
     '/transactions',
@@ -60,3 +65,8 @@ Route::delete(
     '/transactions/{id}',
     [TransactionController::class, 'destroy']
 )->name('transactions.destroy');
+
+Route::patch(
+    '/categories/{category}/toggle-status',
+    [CategoryController::class, 'toggleStatus']
+)->name('categories.toggle-status');
