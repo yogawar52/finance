@@ -26,6 +26,8 @@ Route::resource('categories', CategoryController::class)
         'index',
         'create',
         'store',
+        'edit',
+        'update',
     ]);
 
 Route::patch(

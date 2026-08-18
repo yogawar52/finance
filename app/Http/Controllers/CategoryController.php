@@ -35,6 +35,71 @@ class CategoryController extends Controller
         return view('categories.create', compact('categories'));
     }
 
+    public function edit(int $category)
+    {
+        $user = User::where('email', 'yoga@example.com')->firstOrFail();
+
+        $category = $user->categories()->findOrFail($category);
+
+        $categories = $user->categories()
+            ->whereNull('parent_id')
+            ->where('is_active', true)
+            ->where('id', '!=', $category->id)
+            ->orderBy('type')
+            ->orderBy('name')
+            ->get();
+
+        return view('categories.edit', compact('category', 'categories'));
+    }
+
+    public function update(Request $request, int $category)
+    {
+        $user = User::where('email', 'yoga@example.com')->firstOrFail();
+
+        $category = $user->categories()->findOrFail($category);
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:100'],
+            'type' => ['required', 'in:income,expense'],
+            'parent_id' => ['nullable', 'integer'],
+        ]);
+
+        // Category yang memiliki children tidak boleh dijadikan subcategory.
+        if ($category->children()->exists() && !empty($validated['parent_id'])) {
+            return back()
+                ->withErrors([
+                    'parent_id' => 'Main category yang memiliki subcategory tidak dapat dijadikan subcategory.'
+                ])
+                ->withInput();
+        }
+
+        if (!empty($validated['parent_id'])) {
+            $parent = $user->categories()
+                ->whereNull('parent_id')
+                ->where('id', $validated['parent_id'])
+                ->where('is_active', true)
+                ->firstOrFail();
+
+            if ($parent->type !== $validated['type']) {
+                return back()
+                    ->withErrors([
+                        'parent_id' => 'Type subcategory harus sama dengan parent category.'
+                    ])
+                    ->withInput();
+            }
+        }
+
+        $category->update([
+            'name' => $validated['name'],
+            'type' => $validated['type'],
+            'parent_id' => $validated['parent_id'] ?? null,
+        ]);
+
+        return redirect()
+            ->route('categories.index')
+            ->with('success', 'Category berhasil diperbarui.');
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -67,6 +132,8 @@ class CategoryController extends Controller
             'parent_id' => $validated['parent_id'] ?? null,
             'is_active' => true,
         ]);
+
+
 
         return redirect()
             ->route('categories.index')
