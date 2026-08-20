@@ -6,12 +6,14 @@ use App\Models\User;
 use App\Services\BalanceService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Services\FinancialReportService;
 
 class DashboardController extends Controller
 {
     public function index(
         Request $request,
-        BalanceService $balanceService
+        BalanceService $balanceService,
+        FinancialReportService $reportService
     ) {
         $user = User::where(
             'email',
@@ -24,17 +26,22 @@ class DashboardController extends Controller
         );
 
         try {
-
             $selectedMonth = Carbon::createFromFormat(
-                'Y-m',
+                '!Y-m',
                 $month
             );
+
+            if ($selectedMonth->format('Y-m') !== $month) {
+                throw new \Exception('Invalid month format');
+            }
         } catch (\Exception $e) {
 
-            $selectedMonth = now();
+            $selectedMonth = now()->startOfMonth();
 
             $month = $selectedMonth->format('Y-m');
         }
+
+        $selectedMonthLabel = $selectedMonth->format('F Y');
 
         /*
         |--------------------------------------------------------------------------
@@ -47,14 +54,14 @@ class DashboardController extends Controller
             ->orderBy('name')
             ->get();
 
-        $balances = [];
+        $accountBalances = [];
 
         foreach ($accounts as $account) {
-            $balances[$account->id] =
+            $accountBalances[$account->id] =
                 $balanceService->getBalance($account);
         }
 
-        $totalAssets = array_sum($balances);
+        $totalAssets = array_sum($accountBalances);
 
 
         /*
@@ -64,6 +71,7 @@ class DashboardController extends Controller
         */
 
         $startOfMonth = $selectedMonth
+            // ->format('F Y')
             ->copy()
             ->startOfMonth();
 
@@ -71,25 +79,22 @@ class DashboardController extends Controller
             ->copy()
             ->endOfMonth();
 
-        $monthlyTransactions = $user->transactions()
-            ->whereBetween(
-                'transaction_date',
-                [
-                    $startOfMonth,
-                    $endOfMonth,
-                ]
-            )
-            ->get();
+        $report = $reportService->monthly(
+            $user,
+            $startOfMonth,
+            $endOfMonth
+        );
 
-        $income = $monthlyTransactions
-            ->where('type', 'income')
-            ->sum('amount');
+        $monthlyTransactions = $report['transactions'];
 
-        $expense = $monthlyTransactions
-            ->where('type', 'expense')
-            ->sum('amount');
+        $income = $report['income'];
 
-        $net = $income - $expense;
+        $expense = $report['expense'];
+
+        $net = $report['net'];
+
+        $expenseByCategory =
+            $report['expenseByCategory'];
 
 
         /*
@@ -102,14 +107,14 @@ class DashboardController extends Controller
 
         for ($i = 5; $i >= 0; $i--) {
 
-            $month = $selectedMonth
+            $chartMonth = $selectedMonth
                 ->copy()
                 ->subMonths($i);
 
-            $start = $month->copy()
+            $start = $chartMonth->copy()
                 ->startOfMonth();
 
-            $end = $month->copy()
+            $end = $chartMonth->copy()
                 ->endOfMonth();
 
             $transactions = $user->transactions()
@@ -123,7 +128,7 @@ class DashboardController extends Controller
                 ->get();
 
             $monthlyChart->push([
-                'label' => $month->format('M Y'),
+                'label' => $chartMonth->format('M Y'),
 
                 'income' => (float) $transactions
                     ->where('type', 'income')
@@ -141,14 +146,6 @@ class DashboardController extends Controller
         | Expense by Category
         |--------------------------------------------------------------------------
         */
-
-        $expenseByCategory = $monthlyTransactions
-            ->where('type', 'expense')
-            ->groupBy('category_id')
-            ->map(function ($items) {
-                return $items->sum('amount');
-            });
-
 
         $categories = $user->categories()
             ->with('parent')
@@ -168,6 +165,13 @@ class DashboardController extends Controller
                 'destinationAccount',
                 'category',
             ])
+            ->whereBetween(
+                'transaction_date',
+                [
+                    $startOfMonth,
+                    $endOfMonth,
+                ]
+            )
             ->orderByDesc('transaction_date')
             ->orderByDesc('id')
             ->limit(10)
@@ -178,7 +182,8 @@ class DashboardController extends Controller
             'dashboard',
             compact(
                 'accounts',
-                'balances',
+                'accountBalances',
+                // 'balances',
                 'totalAssets',
                 'income',
                 'expense',
@@ -187,7 +192,8 @@ class DashboardController extends Controller
                 'monthlyChart',
                 'expenseByCategory',
                 'categories',
-                'month'
+                'month',
+                'selectedMonthLabel'
             )
         );
     }
