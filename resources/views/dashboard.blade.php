@@ -16,6 +16,24 @@
                 Financial overview
             </p>
 
+            <form method="GET" action="{{ route('dashboard') }}" class="flex items-end gap-3 mt-5">
+
+                <div>
+
+                    <label class="block text-sm font-medium mb-1">
+                        Period
+                    </label>
+
+                    <input type="month" name="month" value="{{ $month }}" class="border rounded-lg px-3 py-2">
+
+                </div>
+
+                <button type="submit" class="bg-black text-white px-4 py-2 rounded-lg">
+                    Apply
+                </button>
+
+            </form>
+
         </div>
 
         <div class="flex gap-3">
@@ -325,151 +343,131 @@
 @endsection
 
 @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
+            /*
+            |--------------------------------------------------------------------------
+            | Monthly Income vs Expense
+            |--------------------------------------------------------------------------
+            */
 
-    /*
-    |--------------------------------------------------------------------------
-    | Monthly Income vs Expense
-    |--------------------------------------------------------------------------
-    */
+            const monthlyData = @json($monthlyChart);
 
-    const monthlyData = @json($monthlyChart);
+            const incomeExpenseCanvas =
+                document.getElementById(
+                    'incomeExpenseChart'
+                );
 
-    const incomeExpenseCanvas =
-        document.getElementById(
-            'incomeExpenseChart'
-        );
+            if (incomeExpenseCanvas) {
 
-    if (incomeExpenseCanvas) {
+                new Chart(
+                    incomeExpenseCanvas, {
+                        type: 'bar',
 
-        new Chart(
-            incomeExpenseCanvas,
-            {
-                type: 'bar',
+                        data: {
+                            labels: monthlyData.map(
+                                item => item.label
+                            ),
 
-                data: {
-                    labels: monthlyData.map(
-                        item => item.label
-                    ),
+                            datasets: [{
+                                    label: 'Income',
 
-                    datasets: [
-                        {
-                            label: 'Income',
+                                    data: monthlyData.map(
+                                        item => item.income
+                                    )
+                                },
 
-                            data: monthlyData.map(
-                                item => item.income
-                            )
+                                {
+                                    label: 'Expense',
+
+                                    data: monthlyData.map(
+                                        item => item.expense
+                                    )
+                                }
+                            ]
                         },
 
-                        {
-                            label: 'Expense',
+                        options: {
+                            responsive: true,
 
-                            data: monthlyData.map(
-                                item => item.expense
-                            )
-                        }
-                    ]
-                },
+                            maintainAspectRatio: false,
 
-                options: {
-                    responsive: true,
-
-                    maintainAspectRatio: false,
-
-                    scales: {
-                        y: {
-                            beginAtZero: true
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
                         }
                     }
-                }
+                );
+
             }
-        );
-
-    }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Expense by Category
-    |--------------------------------------------------------------------------
-    */
+            /*
+            |--------------------------------------------------------------------------
+            | Expense by Category
+            |--------------------------------------------------------------------------
+            */
 
-    const categoryData = @json(
-        $expenseByCategory->mapWithKeys(
-            function ($amount, $categoryId) use ($categories) {
+            const categoryData = @json(
+                $expenseByCategory->mapWithKeys(function ($amount, $categoryId) use ($categories) {
+                    $category = $categories->get($categoryId);
 
-                $category =
-                    $categories->get($categoryId);
+                    if ($category?->parent) {
+                        $name = $category->parent->name . ' → ' . $category->name;
+                    } else {
+                        $name = $category?->name ?? 'Uncategorized';
+                    }
 
-                if ($category?->parent) {
-
-                    $name =
-                        $category->parent->name
-                        . ' → '
-                        . $category->name;
-
-                } else {
-
-                    $name =
-                        $category?->name
-                        ?? 'Uncategorized';
-                }
-
-                return [
-                    $name => $amount
-                ];
-            }
-        )
-    );
+                    return [
+                        $name => $amount,
+                    ];
+                }));
 
 
-    const expenseCategoryCanvas =
-        document.getElementById(
-            'expenseCategoryChart'
-        );
+            const expenseCategoryCanvas =
+                document.getElementById(
+                    'expenseCategoryChart'
+                );
 
-    const categoryLabels =
-        Object.keys(categoryData);
+            const categoryLabels =
+                Object.keys(categoryData);
 
-    const categoryAmounts =
-        Object.values(categoryData);
+            const categoryAmounts =
+                Object.values(categoryData);
 
 
-    if (
-        expenseCategoryCanvas &&
-        categoryLabels.length > 0
-    ) {
+            if (
+                expenseCategoryCanvas &&
+                categoryLabels.length > 0
+            ) {
 
-        new Chart(
-            expenseCategoryCanvas,
-            {
-                type: 'doughnut',
+                new Chart(
+                    expenseCategoryCanvas, {
+                        type: 'doughnut',
 
-                data: {
-                    labels: categoryLabels,
+                        data: {
+                            labels: categoryLabels,
 
-                    datasets: [
-                        {
-                            label: 'Expense',
+                            datasets: [{
+                                label: 'Expense',
 
-                            data: categoryAmounts
+                                data: categoryAmounts
+                            }]
+                        },
+
+                        options: {
+                            responsive: true,
+
+                            maintainAspectRatio: false
                         }
-                    ]
-                },
+                    }
+                );
 
-                options: {
-                    responsive: true,
-
-                    maintainAspectRatio: false
-                }
             }
-        );
 
-    }
-
-});
-</script>
-
+        });
+    </script>
 @endpush
