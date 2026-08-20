@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ReportController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -70,3 +71,8 @@ Route::patch(
     '/categories/{category}/toggle-status',
     [CategoryController::class, 'toggleStatus']
 )->name('categories.toggle-status');
+
+Route::get(
+    '/reports/monthly',
+    [ReportController::class, 'monthly']
+)->name('reports.monthly');

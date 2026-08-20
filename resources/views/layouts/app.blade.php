@@ -65,6 +65,12 @@
                     Transactions
                 </a>
 
+                <a href="{{ route('reports.monthly') }}"
+                    class="block px-4 py-2 rounded-lg
+        {{ request()->is('reports*') ? 'bg-gray-100 font-semibold' : 'hover:bg-gray-100' }}">
+                    Reports
+                </a>
+
             </nav>
 
         </aside>
@@ -90,6 +96,8 @@
         </main>
 
     </div>
+
+    @stack('scripts')
 
 </body>
 

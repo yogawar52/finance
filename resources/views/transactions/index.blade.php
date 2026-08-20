@@ -22,9 +22,14 @@
 
                 </div>
 
-                <a href="#" class="bg-black text-white px-4 py-2 rounded-lg">
+                <a href="{{ route('transactions.create') }}"
+                    class="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800">
                     Add Transaction
                 </a>
+
+                {{-- <a href="#" class="bg-black text-white px-4 py-2 rounded-lg">
+                    Add Transaction
+                </a> --}}
 
             </div>
 

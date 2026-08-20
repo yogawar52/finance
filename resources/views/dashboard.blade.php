@@ -167,7 +167,7 @@
                     <p class="text-xl font-bold mt-2">
 
                         Rp
-                        {{ number_format($balances[$account->id], 0, ',', '.') }}
+                        {{ number_format($accountBalances[$account->id], 0, ',', '.') }}
 
                     </p>
 
@@ -223,8 +223,11 @@
 
         <div class="flex justify-between items-center mb-4">
 
-            <h2 class="text-lg font-bold">
+            <h2 class="text-lg font-semibold">
                 Recent Transactions
+                <span class="text-sm font-normal text-gray-500">
+                    — {{ $selectedMonthLabel }}
+                </span>
             </h2>
 
             <a href="{{ route('transactions.index') }}" class="text-sm underline">
@@ -272,7 +275,7 @@
 
                         <tbody class="divide-y">
 
-                            @foreach ($recentTransactions as $transaction)
+                            @forelse ($recentTransactions as $transaction)
                                 <tr>
 
                                     <td class="px-6 py-4">
