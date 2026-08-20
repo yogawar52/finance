@@ -160,6 +160,44 @@
 
     </div>
 
+    {{-- Charts --}}
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+
+        {{-- Income vs Expense --}}
+
+        <div class="bg-white rounded-xl shadow p-6">
+
+            <h2 class="text-lg font-semibold mb-5">
+                Income vs Expense
+            </h2>
+
+            <div class="relative h-80">
+
+                <canvas id="incomeExpenseChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+        {{-- Expense by Category --}}
+
+        <div class="bg-white rounded-xl shadow p-6">
+
+            <h2 class="text-lg font-semibold mb-5">
+                Expense by Category
+            </h2>
+
+            <div class="relative h-80">
+
+                <canvas id="expenseCategoryChart"></canvas>
+
+            </div>
+
+        </div>
+
+    </div>
 
     {{-- Recent Transactions --}}
 
@@ -285,3 +323,153 @@
     </div>
 
 @endsection
+
+@push('scripts')
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    /*
+    |--------------------------------------------------------------------------
+    | Monthly Income vs Expense
+    |--------------------------------------------------------------------------
+    */
+
+    const monthlyData = @json($monthlyChart);
+
+    const incomeExpenseCanvas =
+        document.getElementById(
+            'incomeExpenseChart'
+        );
+
+    if (incomeExpenseCanvas) {
+
+        new Chart(
+            incomeExpenseCanvas,
+            {
+                type: 'bar',
+
+                data: {
+                    labels: monthlyData.map(
+                        item => item.label
+                    ),
+
+                    datasets: [
+                        {
+                            label: 'Income',
+
+                            data: monthlyData.map(
+                                item => item.income
+                            )
+                        },
+
+                        {
+                            label: 'Expense',
+
+                            data: monthlyData.map(
+                                item => item.expense
+                            )
+                        }
+                    ]
+                },
+
+                options: {
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            }
+        );
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Expense by Category
+    |--------------------------------------------------------------------------
+    */
+
+    const categoryData = @json(
+        $expenseByCategory->mapWithKeys(
+            function ($amount, $categoryId) use ($categories) {
+
+                $category =
+                    $categories->get($categoryId);
+
+                if ($category?->parent) {
+
+                    $name =
+                        $category->parent->name
+                        . ' → '
+                        . $category->name;
+
+                } else {
+
+                    $name =
+                        $category?->name
+                        ?? 'Uncategorized';
+                }
+
+                return [
+                    $name => $amount
+                ];
+            }
+        )
+    );
+
+
+    const expenseCategoryCanvas =
+        document.getElementById(
+            'expenseCategoryChart'
+        );
+
+    const categoryLabels =
+        Object.keys(categoryData);
+
+    const categoryAmounts =
+        Object.values(categoryData);
+
+
+    if (
+        expenseCategoryCanvas &&
+        categoryLabels.length > 0
+    ) {
+
+        new Chart(
+            expenseCategoryCanvas,
+            {
+                type: 'doughnut',
+
+                data: {
+                    labels: categoryLabels,
+
+                    datasets: [
+                        {
+                            label: 'Expense',
+
+                            data: categoryAmounts
+                        }
+                    ]
+                },
+
+                options: {
+                    responsive: true,
+
+                    maintainAspectRatio: false
+                }
+            }
+        );
+
+    }
+
+});
+</script>
+
+@endpush
