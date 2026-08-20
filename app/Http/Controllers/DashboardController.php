@@ -8,12 +8,19 @@ use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
-    public function index(BalanceService $balanceService)
-    {
+    public function index(
+        BalanceService $balanceService
+    ) {
         $user = User::where(
             'email',
             'yoga@example.com'
         )->firstOrFail();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Accounts & Balances
+        |--------------------------------------------------------------------------
+        */
 
         $accounts = $user->accounts()
             ->where('is_active', true)
@@ -27,14 +34,23 @@ class DashboardController extends Controller
                 $balanceService->getBalance($account);
         }
 
+        $totalAssets = array_sum($balances);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Current Month
+        |--------------------------------------------------------------------------
+        */
+
         $startOfMonth = Carbon::now()
             ->startOfMonth();
 
         $endOfMonth = Carbon::now()
             ->endOfMonth();
 
-        $income = $user->transactions()
-            ->where('type', 'income')
+
+        $monthlyTransactions = $user->transactions()
             ->whereBetween(
                 'transaction_date',
                 [
@@ -42,18 +58,27 @@ class DashboardController extends Controller
                     $endOfMonth,
                 ]
             )
+            ->get();
+
+
+        $income = $monthlyTransactions
+            ->where('type', 'income')
             ->sum('amount');
 
-        $expense = $user->transactions()
+
+        $expense = $monthlyTransactions
             ->where('type', 'expense')
-            ->whereBetween(
-                'transaction_date',
-                [
-                    $startOfMonth,
-                    $endOfMonth,
-                ]
-            )
             ->sum('amount');
+
+
+        $net = $income - $expense;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Recent Transactions
+        |--------------------------------------------------------------------------
+        */
 
         $recentTransactions = $user->transactions()
             ->with([
@@ -66,13 +91,16 @@ class DashboardController extends Controller
             ->limit(10)
             ->get();
 
+
         return view(
             'dashboard',
             compact(
                 'accounts',
                 'balances',
+                'totalAssets',
                 'income',
                 'expense',
+                'net',
                 'recentTransactions'
             )
         );

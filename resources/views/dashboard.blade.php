@@ -18,16 +18,44 @@
 
         </div>
 
-        <a href="{{ route('transactions.create') }}" class="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800">
-            Add Transaction
-        </a>
+        <div class="flex gap-3">
+
+            <a href="{{ route('reports.monthly') }}" class="border px-4 py-2 rounded-lg hover:bg-gray-50">
+                Monthly Report
+            </a>
+
+            <a href="{{ route('transactions.create') }}" class="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800">
+                Add Transaction
+            </a>
+
+        </div>
 
     </div>
 
 
-    {{-- Summary --}}
+    {{-- Financial Summary --}}
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+
+        {{-- Total Assets --}}
+
+        <div class="bg-white rounded-xl shadow p-6">
+
+            <p class="text-sm text-gray-500">
+                Total Assets
+            </p>
+
+            <p class="text-2xl font-bold mt-2">
+
+                Rp
+                {{ number_format($totalAssets, 0, ',', '.') }}
+
+            </p>
+
+        </div>
+
+
+        {{-- Income --}}
 
         <div class="bg-white rounded-xl shadow p-6">
 
@@ -35,9 +63,9 @@
                 Income This Month
             </p>
 
-            <p class="text-2xl font-bold mt-2">
+            <p class="text-2xl font-bold text-green-600 mt-2">
 
-                Rp
+                + Rp
                 {{ number_format($income, 0, ',', '.') }}
 
             </p>
@@ -45,21 +73,25 @@
         </div>
 
 
+        {{-- Expense --}}
+
         <div class="bg-white rounded-xl shadow p-6">
 
             <p class="text-sm text-gray-500">
                 Expense This Month
             </p>
 
-            <p class="text-2xl font-bold mt-2">
+            <p class="text-2xl font-bold text-red-600 mt-2">
 
-                Rp
+                - Rp
                 {{ number_format($expense, 0, ',', '.') }}
 
             </p>
 
         </div>
 
+
+        {{-- Net --}}
 
         <div class="bg-white rounded-xl shadow p-6">
 
@@ -69,8 +101,17 @@
 
             <p class="text-2xl font-bold mt-2">
 
-                Rp
-                {{ number_format($income - $expense, 0, ',', '.') }}
+                @if ($net >= 0)
+                    <span class="text-green-600">
+                        + Rp
+                        {{ number_format($net, 0, ',', '.') }}
+                    </span>
+                @else
+                    <span class="text-red-600">
+                        - Rp
+                        {{ number_format(abs($net), 0, ',', '.') }}
+                    </span>
+                @endif
 
             </p>
 
@@ -86,7 +127,7 @@
         <div class="flex justify-between items-center mb-4">
 
             <h2 class="text-lg font-bold">
-                Accounts
+                Accounts Balances
             </h2>
 
             <a href="/accounts" class="text-sm underline">
